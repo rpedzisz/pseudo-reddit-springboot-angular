@@ -1,15 +1,21 @@
 package com.example.pseudoreddit.services;
 
 
+import com.example.pseudoreddit.classes.AuthenticationResponse;
+import com.example.pseudoreddit.classes.LoginRequest;
 import com.example.pseudoreddit.classes.RegisterRequest;
-import com.example.pseudoreddit.exceptions.EmailException;
+import com.example.pseudoreddit.exceptions.RedditException;
 import com.example.pseudoreddit.models.NotificationEmail;
 import com.example.pseudoreddit.models.Token;
 import com.example.pseudoreddit.models.User;
 import com.example.pseudoreddit.repository.TokenRepository;
 import com.example.pseudoreddit.repository.UserRepository;
+import com.example.pseudoreddit.security.JwtProvider;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -25,12 +31,13 @@ public class AuthService {
 
 
     private final PasswordEncoder passwordEncoder;
-
     private final UserRepository userRepository;
-
     private  final TokenRepository tokenRepository;
-
     private final EmailSenderService emailSenderService;
+    private final AuthenticationManager authenticationManager;
+    private final JwtProvider jwtProvider;
+
+
     @Transactional
     public void signup(RegisterRequest registerRequest){
         User user = new User();
@@ -73,7 +80,7 @@ public class AuthService {
     @Transactional
     public void fetchUserAndEnable(Token token){
         String username = token.getUser().getUsername();
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new EmailException("Enabling username failed - user not found"));
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new RedditException("Enabling username failed - user not found"));
 
             user.setEnabled(true);
             userRepository.save(user);
@@ -83,7 +90,7 @@ public class AuthService {
     public void verifyAccount(String token){
        Optional<Token> verificationToken =  tokenRepository.findByToken(token);
 
-       verificationToken.orElseThrow(() -> new EmailException("Email token error"));
+       verificationToken.orElseThrow(() -> new RedditException("Email token error"));
 
         fetchUserAndEnable(verificationToken.get());
 
@@ -92,5 +99,12 @@ public class AuthService {
 
 
 
+    public AuthenticationResponse login(LoginRequest loginrequest) {
+    Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginrequest.getUsername(), loginrequest.getPassword()));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
+      String token = jwtProvider.generateToken(authentication);
+
+      return new AuthenticationResponse(token, loginrequest.getUsername());
+    }
 }

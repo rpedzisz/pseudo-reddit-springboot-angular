@@ -1,6 +1,8 @@
 package com.example.pseudoreddit.controller;
 
 
+import com.example.pseudoreddit.classes.AuthenticationResponse;
+import com.example.pseudoreddit.classes.LoginRequest;
 import com.example.pseudoreddit.classes.RegisterRequest;
 import com.example.pseudoreddit.services.AuthService;
 import lombok.AllArgsConstructor;
@@ -31,6 +33,17 @@ public class AuthController {
         return new ResponseEntity<>("Account verified", HttpStatus.OK);
 
     }
+
+
+    @PostMapping("/login")
+public AuthenticationResponse login(@RequestBody LoginRequest loginrequest){
+       return authService.login(loginrequest);
+
+
+    }
+
+
+
 
 
 
