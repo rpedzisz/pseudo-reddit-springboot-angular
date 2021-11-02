@@ -27,7 +27,7 @@ import static javax.persistence.GenerationType.IDENTITY;
 public class Subforum {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = IDENTITY)
     private long subforumId;
     @NotBlank(message = "Name can't be blank")
     private String name;
