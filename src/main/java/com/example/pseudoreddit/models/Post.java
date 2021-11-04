@@ -40,8 +40,8 @@ public class Post {
     private User user;
     private Instant creationDate;
     @ManyToOne(fetch = LAZY)
-    @JoinColumn(name = "subforumId", referencedColumnName = "subforumId")
-    private Subforum subforum;
+    @JoinColumn(name = "id", referencedColumnName = "id")
+    private Subreddit subreddit;
 
 
 }

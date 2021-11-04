@@ -1,9 +1,12 @@
 package com.example.pseudoreddit.services;
 
 
-import com.example.pseudoreddit.classes.SubredditEnc;
-import com.example.pseudoreddit.models.Subforum;
-import com.example.pseudoreddit.repository.SubforumRepository;
+import com.example.pseudoreddit.Mapper.SubredditMapper;
+import com.example.pseudoreddit.classes.SubredditDto;
+
+import com.example.pseudoreddit.exceptions.RedditException;
+import com.example.pseudoreddit.models.Subreddit;
+import com.example.pseudoreddit.repository.SubredditRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,39 +23,51 @@ import static java.util.stream.Collectors.toList;
 public class SubredditService {
 
 
-    private final SubforumRepository subforumRepository;
+    private final SubredditRepository subredditRepository;
+    private final SubredditMapper subredditMapper;
 
     @Transactional
-    public SubredditEnc save(SubredditEnc subredditEnc){
+    public SubredditDto save(SubredditDto subredditEnc){
 
-        Subforum subforum = mapSubredditEnc(subredditEnc);
-        Subforum save = subforumRepository.save(subforum);
-        subredditEnc.setId(save.getSubforumId());
+        Subreddit save = subredditRepository.save(subredditMapper.mapDtoToSubreddit(subredditEnc));
+        subredditEnc.setId(save.getId());
         return subredditEnc;
     }
 
     @Transactional
-    public List<SubredditEnc> getAll(){
-        return subforumRepository.findAll()
+    public List<SubredditDto> getAll(){
+        return subredditRepository.findAll()
                 .stream()
-                .map(this::mapToEnc)
+                .map(subredditMapper::mapSubredditToDto)
                 .collect(toList());
 
 
 
     }
 
-    private SubredditEnc mapToEnc(Subforum subforum){
+
+    public SubredditDto getSubreddit(Long id){
+        Subreddit subreddit = subredditRepository.findById(id)
+                .orElseThrow(() -> new RedditException("No subreddit with this id exists"));
+        return  subredditMapper.mapSubredditToDto(subreddit);
 
 
-        return SubredditEnc.builder().subredditName(subforum.getName())
-                .id(subforum.getSubforumId())
+    }
+
+
+
+
+    private SubredditDto mapToDto(Subreddit subforum){
+
+
+        return SubredditDto.builder().name(subforum.getName())
+                .id(subforum.getId())
                 .numberOfPosts(subforum.getPosts().size())
                 .build();
     }
 
-    private Subforum mapSubredditEnc(SubredditEnc subredditEnc) {
-        return Subforum.builder().name(subredditEnc.getSubredditName()).description(subredditEnc.getDescription()).build();
+    private Subreddit mapSubredditEnc(SubredditDto subredditEnc) {
+        return Subreddit.builder().name(subredditEnc.getName()).description(subredditEnc.getDescription()).build();
 
     }
 

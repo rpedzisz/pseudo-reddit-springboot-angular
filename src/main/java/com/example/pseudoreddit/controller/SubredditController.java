@@ -1,7 +1,7 @@
 package com.example.pseudoreddit.controller;
 
 
-import com.example.pseudoreddit.classes.SubredditEnc;
+import com.example.pseudoreddit.classes.SubredditDto;
 import com.example.pseudoreddit.services.SubredditService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +19,7 @@ public class SubredditController {
 
     private final SubredditService subredditService;
     @PostMapping
-    public ResponseEntity<SubredditEnc> createSubreddit(@RequestBody SubredditEnc subredditEnc){
+    public ResponseEntity<SubredditDto> createSubreddit(@RequestBody SubredditDto subredditEnc){
 
        return ResponseEntity.status(HttpStatus.CREATED).body(
                 subredditService.save(subredditEnc));
@@ -27,9 +27,18 @@ public class SubredditController {
     }
 
     @GetMapping
-    public ResponseEntity<List<SubredditEnc>> getAllSubreddits(){
+    public ResponseEntity<List<SubredditDto>> getAllSubreddits(){
         return ResponseEntity.status(HttpStatus.OK).body(subredditService.getAll());
     }
+
+
+    @GetMapping("/{id}")
+    public ResponseEntity<SubredditDto> getSubreddit(@PathVariable Long id){
+        return ResponseEntity.status(HttpStatus.OK).body(subredditService.getSubreddit(id));
+
+    }
+
+
 
 
 

@@ -24,11 +24,11 @@ import static javax.persistence.GenerationType.IDENTITY;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Subforum {
+public class Subreddit {
 
     @Id
     @GeneratedValue(strategy = IDENTITY)
-    private long subforumId;
+    private long id;
     @NotBlank(message = "Name can't be blank")
     private String name;
     @NotBlank(message = "Description can't be blank")
