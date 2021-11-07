@@ -3,6 +3,7 @@ package com.example.pseudoreddit.services;
 
 import com.example.pseudoreddit.classes.AuthenticationResponse;
 import com.example.pseudoreddit.classes.LoginRequest;
+import com.example.pseudoreddit.classes.RefreshTokenRequest;
 import com.example.pseudoreddit.classes.RegisterRequest;
 import com.example.pseudoreddit.exceptions.RedditException;
 import com.example.pseudoreddit.models.NotificationEmail;
@@ -12,6 +13,7 @@ import com.example.pseudoreddit.repository.TokenRepository;
 import com.example.pseudoreddit.repository.UserRepository;
 import com.example.pseudoreddit.security.JwtProvider;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -20,6 +22,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.transaction.Transactional;
 import java.time.Instant;
 import java.util.Optional;
@@ -27,7 +30,6 @@ import java.util.UUID;
 
 @Service
 @AllArgsConstructor
-
 public class AuthService {
 
 
@@ -37,6 +39,7 @@ public class AuthService {
     private final EmailSenderService emailSenderService;
     private final AuthenticationManager authenticationManager;
     private final JwtProvider jwtProvider;
+    private final RefreshTokenService refreshTokenService;
 
 
     @Transactional
@@ -114,10 +117,29 @@ public class AuthService {
 
       String token = jwtProvider.generateToken(authentication);
 
-      return new AuthenticationResponse(token, loginrequest.getUsername());
+      return AuthenticationResponse.builder()
+              .authenticationToken(token)
+              .refreshToken(refreshTokenService.generateRefreshTokenForUser(loginrequest.getUsername()).getToken())
+              .expiresAt(Instant.now().plusMillis(jwtProvider.getJwtExpirationInMillis()))
+              .username(loginrequest.getUsername())
+              .build();
+
+
+
     }
 
 
+    public AuthenticationResponse refreshToken(RefreshTokenRequest refreshTokenRequest) {
 
+        refreshTokenService.validateRefreshTokenForUser(refreshTokenRequest.getRefreshToken(), refreshTokenRequest.getUsername());
+        String token = jwtProvider.generateTokenWithUsername(refreshTokenRequest.getUsername());
 
+        return AuthenticationResponse.builder()
+                .authenticationToken(token)
+                .refreshToken(refreshTokenRequest.getRefreshToken())
+                .expiresAt(Instant.now().plusMillis(jwtProvider.getJwtExpirationInMillis()))
+                .username(refreshTokenRequest.getUsername())
+                .build();
+
+    }
 }
