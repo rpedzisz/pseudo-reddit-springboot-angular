@@ -26,7 +26,7 @@ public class SwaggerConfiguration {
     }
     private ApiInfo getApiInfo(){
 
-    return new ApiInfoBuilder(){}
+    return new ApiInfoBuilder()
     .title("Pseudo Reddit API")
             .version("1")
             .description("API for pseudo reddit application")
