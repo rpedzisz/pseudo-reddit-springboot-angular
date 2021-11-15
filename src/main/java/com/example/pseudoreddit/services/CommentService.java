@@ -38,8 +38,8 @@ public class CommentService {
 
     commentRepository.save(comment);
 
-    String message = emailContentService.buildEmailContent(post.getUser().getUsername() + " posted a comment on post: " + POST_URL);
-    sendCommentNotification(message, post.getUser() );
+  //  String message = emailContentService.buildEmailContent(post.getUser().getUsername() + " posted a comment on post: " + POST_URL);
+    //sendCommentNotification(message, post.getUser() );
     }
 
     private void sendCommentNotification(String message, User user){
@@ -56,7 +56,7 @@ public class CommentService {
     }
 
 
-    public Object getAllCommentsForUser(String userName) {
+    public List<CommentDto>  getAllCommentsForUser(String userName) {
         User user =  userRepository.findByUsername(userName).orElseThrow(() -> new RedditException("Post not found"));
 
 

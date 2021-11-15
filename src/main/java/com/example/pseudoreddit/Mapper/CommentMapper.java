@@ -13,11 +13,10 @@ public interface CommentMapper {
     @Mapping(target = "text", source = "commentDto.text")
     @Mapping(target = "creationDate", expression = "java(java.time.Instant.now())")
     @Mapping(target = "post", source = "post")
+    @Mapping(target = "user", source = "user")
     Comment map(CommentDto commentDto, Post post, User user);
 
     @Mapping(target = "postId", expression = "java(comment.getPost().getPostId())")
     @Mapping(target = "userName", expression = "java(comment.getUser().getUsername())")
     CommentDto mapToDto(Comment comment);
-
-
 }

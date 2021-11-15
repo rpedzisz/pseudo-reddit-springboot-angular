@@ -14,10 +14,13 @@ import com.example.pseudoreddit.repository.UserRepository;
 import com.example.pseudoreddit.security.JwtProvider;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -27,9 +30,11 @@ import javax.transaction.Transactional;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class AuthService {
 
 
@@ -70,11 +75,15 @@ public class AuthService {
 
     @Transactional
     public User getCurrentUser() {
-        org.springframework.security.core.userdetails.User principal = (org.springframework.security.core.userdetails.User) SecurityContextHolder.
-                getContext().getAuthentication().getPrincipal();
-        return userRepository.findByUsername(principal.getUsername())
-                .orElseThrow(() -> new UsernameNotFoundException("User name not found - " + principal.getUsername()));
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || auth instanceof AnonymousAuthenticationToken) {
+            return null;
+        }
+        String usrname = ((org.springframework.security.core.userdetails.User) auth.getPrincipal()).getUsername();
+        return userRepository.findByUsername(usrname)
+                .orElseThrow(() -> new UsernameNotFoundException("User name not found - " + usrname));
     }
+
 
 
     private String generateToken(User user) {

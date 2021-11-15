@@ -32,9 +32,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers("/api/auth/**")
                 .permitAll()
-                .antMatchers(HttpMethod.GET, "/api/subreddit")
+                .antMatchers( "/api/subreddit")
                 .permitAll()
-                .antMatchers(HttpMethod.GET, "/api/posts/")
+                .antMatchers("/api/posts")
+                .permitAll()
+                .antMatchers("/api/comments")
+                .permitAll()
+                .antMatchers("/api/comments/**")
                 .permitAll()
                 .antMatchers(HttpMethod.GET, "/api/posts/**")
                 .permitAll()
@@ -50,6 +54,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         httpSecurity.addFilterBefore(jwtAuthenticationFilter,
                 UsernamePasswordAuthenticationFilter.class);
     }
+
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
     authenticationManagerBuilder.userDetailsService(userDetailsService)
