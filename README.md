@@ -1,2 +1,2 @@
 # pseudo-reddit-springboot-angular
-backend part of reddit clone with spring boot
+backend part of reddit clone tutorial with spring boot
